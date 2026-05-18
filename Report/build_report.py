@@ -119,7 +119,7 @@ doc.add_paragraph()
 p = doc.add_paragraph()
 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 add_run(p, "Report Submitted to:\n", bold=True, size=12)
-add_run(p, "Mrs. Sarah Alissa, CCSIT-IAU\n", size=12, color="3A4A5F")
+add_run(p, "Dr. Dhiaa, CCSIT-IAU\n", size=12, color="3A4A5F")
 doc.add_paragraph()
 
 # members table
@@ -456,7 +456,7 @@ P(
 figure("py_03_students_form_filled.png", "Figure 3. Add Student form filled in (validation about to fire).")
 P(
     "When the inputs are valid, the record is inserted and the list refreshes immediately. We "
-    "added a fourth student (Sara Mohammed) below; notice that the sort order is preserved and "
+    "added a fourth student (a Demo Student placeholder) below; notice that the sort order is preserved and "
     "the form clears so the next entry doesn’t accidentally inherit the old values:",
     align="justify",
 )

@@ -122,4 +122,4 @@ Full comparison — including syntax, dependencies, paradigm, memory management,
 
 ## License
 
-This is academic coursework, submitted to Mrs. Sarah Alissa at CCSIT-IAU. Use it as a reference, not as a copy-paste source for your own coursework.
+This is academic coursework, submitted to Dr. Dhiaa at CCSIT-IAU. Use it as a reference, not as a copy-paste source for your own coursework.

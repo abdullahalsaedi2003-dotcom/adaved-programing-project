@@ -128,7 +128,7 @@ code("PS> cd Cpp\nPS> .\\server.exe             :: terminal 1 — \"Smart SMS (C
 # ---------------- Test scenarios ----------------
 section_bar("Step 4 — Test Scenarios (try in either client)", NAVY)
 bullet("View All → confirm the 3 seeded students appear. Add ID 2220001111 (try \"abc\" first — rejected).", "Students:")
-bullet("CS516, CS411, CS324 pre-loaded. Add CS401 / Database Systems / 3 / Dr. Mona.", "Courses:")
+bullet("CS516, CS411, CS324 pre-loaded. Add CS401 / Database Systems / 3 / Dr. Dhiaa.", "Courses:")
 bullet("Enroll 2220007240 in CS516 / 2025-2. Try the same combo twice — server blocks duplicates.", "Enroll:")
 bullet("Mark Present for 2220007240 / CS516 / today. Try date 14-5-2026 — server rejects bad format.", "Attendance:")
 bullet("Switch to Summary, enter CS516, see per-student present/absent counts.", "Summary:")

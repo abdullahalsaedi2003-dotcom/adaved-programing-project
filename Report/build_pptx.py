@@ -182,7 +182,7 @@ add_text(s, Inches(0.5), Inches(6.75), Inches(8), Inches(0.4),
 add_text(s, Inches(9.5), Inches(6.35), Inches(3.5), Inches(0.5),
          "Submitted to", size=10, color=GOLD, align="right")
 add_text(s, Inches(9.5), Inches(6.65), Inches(3.5), Inches(0.5),
-         "Mrs. Sarah Alissa", size=14, bold=True, color=WHITE, align="right")
+         "Dr. Dhiaa", size=14, bold=True, color=WHITE, align="right")
 
 
 # =============================================================

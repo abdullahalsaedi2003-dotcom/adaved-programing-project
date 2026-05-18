@@ -82,8 +82,8 @@ try:
 
     # 4. Add Student - good
     app.students_tab.vars["student_id"].set("2220009999")
-    app.students_tab.vars["name"].set("Sara Mohammed")
-    app.students_tab.vars["email"].set("sara@iau.edu.sa")
+    app.students_tab.vars["name"].set("Demo Student")
+    app.students_tab.vars["email"].set("2220009999@iau.edu.sa")
     app.students_tab.vars["phone"].set("0501234567")
     app.students_tab.vars["major"].set("IT")
     app.students_tab.vars["level"].set("3")
@@ -96,7 +96,7 @@ try:
     snap(app, "04_students_after_add", delay=0.8)
 
     # 5. Search students
-    app.students_tab.vars["name"].set("Sara")
+    app.students_tab.vars["name"].set("Demo")
     app.students_tab.search()
     app.update()
     snap(app, "05_students_search", delay=0.6)
@@ -108,7 +108,7 @@ try:
     snap(app, "06_courses_tab", delay=0.8)
 
     # 7. Add a course
-    C.net.send("add_course", {"code": "CS401", "title": "Database Systems", "credits": "3", "instructor": "Dr. Mona"})
+    C.net.send("add_course", {"code": "CS401", "title": "Database Systems", "credits": "3", "instructor": "Dr. Dhiaa"})
     app.courses_tab.view_all()
     snap(app, "07_courses_after_add", delay=0.6)
 

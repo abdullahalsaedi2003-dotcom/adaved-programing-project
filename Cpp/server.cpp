@@ -128,9 +128,9 @@ public:
     void seedIfEmpty() {
         auto rows = store_.readAll();
         if (!rows.empty()) return;
-        store_.append({"2220007240", "Ahmed Al-Awlaqi", "ahmed@iau.edu.sa", "0551234567", "CS", "4"});
-        store_.append({"2220003178", "Abdulaziz Alghamdi", "aziz@iau.edu.sa", "0559876543", "CS", "4"});
-        store_.append({"2220002306", "Abdullah Alsaedi", "abdullah@iau.edu.sa", "0556677889", "CS", "4"});
+        store_.append({"2220007240", "Ahmed Al-Awlaqi", "2220007240@iau.edu.sa", "0551234567", "CS", "4"});
+        store_.append({"2220003178", "Abdulaziz Alghamdi", "2220003178@iau.edu.sa", "0559876543", "CS", "4"});
+        store_.append({"2220002306", "Abdullah Alsaedi", "2220002306@iau.edu.sa", "0556677889", "CS", "4"});
     }
     vector<vector<string>> all() { return store_.readAll(); }
     bool exists(const string& sid) {
@@ -168,9 +168,9 @@ public:
     void seedIfEmpty() {
         auto rows = store_.readAll();
         if (!rows.empty()) return;
-        store_.append({"CS516", "Advanced Programming Language", "3", "Mrs. Sarah Alissa"});
-        store_.append({"CS411", "Software Engineering", "3", "Dr. Fatimah"});
-        store_.append({"CS324", "Operating Systems", "4", "Dr. Khalid"});
+        store_.append({"CS516", "Advanced Programming Language", "3", "Dr. Dhiaa"});
+        store_.append({"CS411", "Software Engineering", "3", "Dr. Dhiaa"});
+        store_.append({"CS324", "Operating Systems", "4", "Dr. Dhiaa"});
     }
     vector<vector<string>> all() { return store_.readAll(); }
     bool exists(const string& code) {

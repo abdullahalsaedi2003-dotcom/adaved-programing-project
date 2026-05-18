@@ -82,9 +82,9 @@ def init_db():
         cur.executemany(
             "INSERT INTO students(student_id,name,email,phone,major,level) VALUES(?,?,?,?,?,?)",
             [
-                ("2220007240", "Ahmed Al-Awlaqi", "ahmed@iau.edu.sa", "0551234567", "CS", 4),
-                ("2220003178", "Abdulaziz Alghamdi", "aziz@iau.edu.sa", "0559876543", "CS", 4),
-                ("2220002306", "Abdullah Alsaedi", "abdullah@iau.edu.sa", "0556677889", "CS", 4),
+                ("2220007240", "Ahmed Al-Awlaqi", "2220007240@iau.edu.sa", "0551234567", "CS", 4),
+                ("2220003178", "Abdulaziz Alghamdi", "2220003178@iau.edu.sa", "0559876543", "CS", 4),
+                ("2220002306", "Abdullah Alsaedi", "2220002306@iau.edu.sa", "0556677889", "CS", 4),
             ],
         )
 
@@ -93,9 +93,9 @@ def init_db():
         cur.executemany(
             "INSERT INTO courses(code,title,credits,instructor) VALUES(?,?,?,?)",
             [
-                ("CS516", "Advanced Programming Language", 3, "Mrs. Sarah Alissa"),
-                ("CS411", "Software Engineering", 3, "Dr. Fatimah"),
-                ("CS324", "Operating Systems", 4, "Dr. Khalid"),
+                ("CS516", "Advanced Programming Language", 3, "Dr. Dhiaa"),
+                ("CS411", "Software Engineering", 3, "Dr. Dhiaa"),
+                ("CS324", "Operating Systems", 4, "Dr. Dhiaa"),
             ],
         )
 

@@ -174,8 +174,8 @@ def render_table(rows, headers):
 
 try:
     # Seed some data first (same as Python screenshot session for visual symmetry)
-    call("add_student|student_id=2220009999|name=Sara Mohammed|email=sara@iau.edu.sa|phone=0501234567|major=IT|level=3")
-    call("add_course|code=CS401|title=Database Systems|credits=3|instructor=Dr. Mona")
+    call("add_student|student_id=2220009999|name=Demo Student|email=2220009999@iau.edu.sa|phone=0501234567|major=IT|level=3")
+    call("add_course|code=CS401|title=Database Systems|credits=3|instructor=Dr. Dhiaa")
     call("enroll|student_id=2220007240|course_code=CS516|semester=2025-2")
     call("enroll|student_id=2220003178|course_code=CS516|semester=2025-2")
     call("enroll|student_id=2220002306|course_code=CS411|semester=2025-2")
@@ -256,8 +256,8 @@ try:
     s = []
     s.append("  choice: 3")
     s.append("  Student ID (10 digits): 2220008888")
-    s.append("  Name: Maha Aldosari")
-    s.append("  Email: maha@iau.edu.sa")
+    s.append("  Name: Test Student")
+    s.append("  Email: 2220008888@iau.edu.sa")
     s.append("  Phone: 0509998888")
     s.append("  Major: CS")
     s.append("  Level (1-10): 2")
@@ -266,7 +266,7 @@ try:
     s.append("  [press Enter to continue]")
     render_console("\n".join(s), "05_students_add_ok")
     # actually persist for the later view
-    call("add_student|student_id=2220008888|name=Maha Aldosari|email=maha@iau.edu.sa|phone=0509998888|major=CS|level=2")
+    call("add_student|student_id=2220008888|name=Test Student|email=2220008888@iau.edu.sa|phone=0509998888|major=CS|level=2")
 
     # 6. Courses view all
     rows, _ = parse(call("list_courses"))
