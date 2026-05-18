@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# C++ build artifacts
+*.o
+*.obj
+Cpp/data/
+
+# OS / IDE
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Build logs
+*.log
+out.log
+err.log
