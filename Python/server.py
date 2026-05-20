@@ -364,6 +364,30 @@ def handle_unenroll(p):
     return {"ok": True}
 
 
+def handle_get_enrolled_students_by_course(p):
+    code = p.get("course_code", "").strip().upper()
+    if not code:
+        return {"ok": False, "error": "Course code is required"}
+
+    conn = get_conn()
+    course = conn.execute("SELECT 1 FROM courses WHERE code=?", (code,)).fetchone()
+    if not course:
+        conn.close()
+        return {"ok": False, "error": "Course not found"}
+
+    rows = conn.execute(
+        "SELECT DISTINCT s.student_id, s.name, e.course_code, c.title "
+        "FROM enrollments e "
+        "JOIN students s ON s.student_id = e.student_id "
+        "JOIN courses c ON c.code = e.course_code "
+        "WHERE e.course_code=? "
+        "ORDER BY s.name, s.student_id",
+        (code,),
+    ).fetchall()
+    conn.close()
+    return {"ok": True, "data": [dict(r) for r in rows]}
+
+
 def handle_mark_attendance(p):
     sid = p.get("student_id", "")
     code = p.get("course_code", "").strip().upper()
@@ -388,6 +412,50 @@ def handle_mark_attendance(p):
     conn.commit()
     conn.close()
     return {"ok": True}
+
+
+def handle_mark_attendance_bulk(p):
+    code = p.get("course_code", "").strip().upper()
+    adate = p.get("date", "")
+    records = p.get("records", [])
+    if not code:
+        return {"ok": False, "error": "Course code is required"}
+    if not is_valid_date(adate):
+        return {"ok": False, "error": "Date must be in YYYY-MM-DD format"}
+    if not records:
+        return {"ok": False, "error": "No attendance records to save"}
+
+    clean_records = []
+    for rec in records:
+        sid = rec.get("student_id", "")
+        status = rec.get("status", "")
+        if status not in ("Present", "Absent"):
+            return {"ok": False, "error": "Status must be Present or Absent"}
+        clean_records.append((sid, status))
+
+    conn = get_conn()
+    try:
+        for sid, status in clean_records:
+            ok = conn.execute(
+                "SELECT 1 FROM enrollments WHERE student_id=? AND course_code=?",
+                (sid, code),
+            ).fetchone()
+            if not ok:
+                conn.rollback()
+                conn.close()
+                return {"ok": False, "error": f"Student {sid} is not enrolled in this course"}
+
+            conn.execute(
+                "INSERT INTO attendance(student_id,course_code,adate,status) VALUES(?,?,?,?)",
+                (sid, code, adate, status),
+            )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        conn.close()
+        raise
+    conn.close()
+    return {"ok": True, "saved": len(clean_records)}
 
 
 def handle_attendance_report(p):
@@ -449,7 +517,9 @@ HANDLERS = {
     "enroll": handle_enroll,
     "list_enrollments": handle_list_enrollments,
     "unenroll": handle_unenroll,
+    "get_enrolled_students_by_course": handle_get_enrolled_students_by_course,
     "mark_attendance": handle_mark_attendance,
+    "mark_attendance_bulk": handle_mark_attendance_bulk,
     "attendance_report": handle_attendance_report,
     "attendance_summary": handle_attendance_summary,
 }

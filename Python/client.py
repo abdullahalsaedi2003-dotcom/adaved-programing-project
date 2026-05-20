@@ -6,6 +6,7 @@ import socket
 import json
 import tkinter as tk
 from tkinter import ttk, messagebox
+from datetime import datetime
 
 HOST = "127.0.0.1"
 PORT = 5055
@@ -427,6 +428,7 @@ class EnrollmentTab(tk.Frame):
 
 
 class AttendanceTab(tk.Frame):
+    ROSTER_COLS = ("student_id", "name", "status")
     COLS = ("student_id", "name", "course_code", "adate", "status")
     SUM_COLS = ("student_id", "name", "present_count", "absent_count")
 
@@ -434,53 +436,133 @@ class AttendanceTab(tk.Frame):
         super().__init__(master, bg="#fafafa")
         self.role = role
 
-        form = tk.LabelFrame(self, text="Mark Attendance", bg="#fafafa", padx=10, pady=8)
+        form = tk.LabelFrame(self, text="Mark Attendance by Course", bg="#fafafa", padx=10, pady=8)
         form.pack(fill="x", padx=8, pady=8)
-        self.sid = tk.StringVar()
         self.code = tk.StringVar()
-        self.adate = tk.StringVar()
-        self.status = tk.StringVar(value="Present")
+        self.adate = tk.StringVar(value=datetime.now().strftime("%Y-%m-%d"))
+        self.roster = []
+        self.status_by_student = {}
+        self.current_view = "roster"
 
-        tk.Label(form, text="Student ID", bg="#fafafa").grid(row=0, column=0, sticky="e", padx=4, pady=4)
-        tk.Entry(form, textvariable=self.sid, width=18).grid(row=0, column=1, padx=4, pady=4)
-        tk.Label(form, text="Course Code", bg="#fafafa").grid(row=0, column=2, sticky="e", padx=4, pady=4)
-        tk.Entry(form, textvariable=self.code, width=14).grid(row=0, column=3, padx=4, pady=4)
-        tk.Label(form, text="Date (YYYY-MM-DD)", bg="#fafafa").grid(row=0, column=4, sticky="e", padx=4, pady=4)
-        tk.Entry(form, textvariable=self.adate, width=14).grid(row=0, column=5, padx=4, pady=4)
-        tk.Label(form, text="Status", bg="#fafafa").grid(row=1, column=0, sticky="e", padx=4, pady=4)
-        ttk.Combobox(form, textvariable=self.status, values=["Present", "Absent"], width=15, state="readonly").grid(row=1, column=1, padx=4, pady=4)
+        tk.Label(form, text="Course Code", bg="#fafafa").grid(row=0, column=0, sticky="e", padx=4, pady=4)
+        self.course_combo = ttk.Combobox(form, textvariable=self.code, width=18)
+        self.course_combo.grid(row=0, column=1, padx=4, pady=4)
+        self.course_combo.bind("<<ComboboxSelected>>", lambda _e: self.load_roster())
+        self.course_combo.bind("<Return>", lambda _e: self.load_roster())
+        self.course_combo.bind("<FocusOut>", lambda _e: self.load_roster())
+        tk.Label(form, text="Date (YYYY-MM-DD)", bg="#fafafa").grid(row=0, column=2, sticky="e", padx=4, pady=4)
+        tk.Entry(form, textvariable=self.adate, width=14).grid(row=0, column=3, padx=4, pady=4)
+        tk.Button(form, text="Load Students", width=14, command=self.load_roster).grid(row=0, column=4, padx=4, pady=4)
 
         btns = tk.Frame(self, bg="#fafafa")
         btns.pack(fill="x", padx=8)
-        tk.Button(btns, text="Mark", width=12, bg="#2ea043", fg="white", command=self.mark).pack(side="left", padx=4, pady=6)
+        tk.Button(btns, text="Save Attendance", width=16, bg="#2ea043", fg="white", command=self.save_attendance).pack(side="left", padx=4, pady=6)
+        tk.Button(btns, text="Set Selected Present", width=18, command=lambda: self.set_selected_status("Present")).pack(side="left", padx=4, pady=6)
+        tk.Button(btns, text="Set Selected Absent", width=18, command=lambda: self.set_selected_status("Absent")).pack(side="left", padx=4, pady=6)
+        tk.Button(btns, text="All Present", width=12, command=lambda: self.set_all_status("Present")).pack(side="left", padx=4, pady=6)
+        tk.Button(btns, text="All Absent", width=12, command=lambda: self.set_all_status("Absent")).pack(side="left", padx=4, pady=6)
         tk.Button(btns, text="Full Report", width=14, command=self.full_report).pack(side="left", padx=4, pady=6)
         tk.Button(btns, text="Summary by Course", width=18, command=self.summary).pack(side="left", padx=4, pady=6)
 
-        self.tree = ttk.Treeview(self, columns=self.COLS, show="headings", height=14)
-        for c, lbl in zip(self.COLS, ("Student ID", "Student Name", "Course", "Date", "Status")):
-            self.tree.heading(c, text=lbl)
-            self.tree.column(c, width=150, anchor="w")
+        self.tree = ttk.Treeview(self, columns=self.ROSTER_COLS, show="headings", height=14, selectmode="extended")
         self.tree.pack(fill="both", expand=True, padx=8, pady=8)
-        self.full_report()
+        self.tree.bind("<Double-1>", self.toggle_selected_status)
+        self.show_roster_table()
+        self.load_course_codes()
 
     def set_readonly(self):
         pass  # instructors should mark attendance
 
-    def mark(self):
-        r = net.send("mark_attendance", {
-            "student_id": self.sid.get().strip(),
-            "course_code": self.code.get().strip(),
+    def load_course_codes(self):
+        r = net.send("list_courses")
+        if r.get("ok"):
+            self.course_combo["values"] = [row["code"] for row in r["data"]]
+
+    def show_roster_table(self):
+        self.current_view = "roster"
+        self.tree["columns"] = self.ROSTER_COLS
+        for c, lbl in zip(self.ROSTER_COLS, ("Student ID", "Student Name", "Status")):
+            self.tree.heading(c, text=lbl)
+            self.tree.column(c, width=220, anchor="w")
+
+    def load_roster(self):
+        code = self.code.get().strip()
+        if not code:
+            return
+        r = net.send("get_enrolled_students_by_course", {"course_code": code})
+        if r.get("ok"):
+            self.roster = r["data"]
+            self.status_by_student = {row["student_id"]: "Present" for row in self.roster}
+            self.populate_roster()
+            if not self.roster:
+                messagebox.showinfo("No students", "No enrolled students found for this course.")
+        else:
+            messagebox.showerror("Error", r.get("error", "Failed"))
+
+    def populate_roster(self):
+        self.show_roster_table()
+        self.tree.delete(*self.tree.get_children())
+        for row in self.roster:
+            sid = row["student_id"]
+            self.tree.insert("", "end", iid=sid, values=(sid, row["name"], self.status_by_student.get(sid, "Present")))
+
+    def set_selected_status(self, status):
+        if self.current_view != "roster":
+            self.populate_roster()
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("Select", "Pick one or more students first.")
+            return
+        for sid in selected:
+            if sid in self.status_by_student:
+                self.status_by_student[sid] = status
+        self.populate_roster()
+
+    def set_all_status(self, status):
+        if not self.roster:
+            messagebox.showwarning("Load students", "Load enrolled students first.")
+            return
+        for sid in self.status_by_student:
+            self.status_by_student[sid] = status
+        self.populate_roster()
+
+    def toggle_selected_status(self, _ev):
+        if self.current_view != "roster":
+            return
+        selected = self.tree.selection()
+        if not selected:
+            return
+        for sid in selected:
+            current = self.status_by_student.get(sid, "Present")
+            self.status_by_student[sid] = "Absent" if current == "Present" else "Present"
+        self.populate_roster()
+
+    def save_attendance(self):
+        code = self.code.get().strip()
+        if not code:
+            messagebox.showwarning("Course", "Enter or select a course code first.")
+            return
+        if not self.roster:
+            messagebox.showwarning("Load students", "Load enrolled students before saving attendance.")
+            return
+        records = [
+            {"student_id": row["student_id"], "status": self.status_by_student.get(row["student_id"], "Present")}
+            for row in self.roster
+        ]
+        r = net.send("mark_attendance_bulk", {
+            "course_code": code,
             "date": self.adate.get().strip(),
-            "status": self.status.get(),
+            "records": records,
         })
         if r.get("ok"):
-            messagebox.showinfo("Saved", "Attendance recorded.")
+            messagebox.showinfo("Saved", f"Attendance saved for {r.get('saved', len(records))} students.")
             self.full_report()
         else:
             messagebox.showerror("Error", r.get("error", "Failed"))
 
     def full_report(self):
         # switch headings back if needed
+        self.current_view = "report"
         self.tree["columns"] = self.COLS
         for c, lbl in zip(self.COLS, ("Student ID", "Student Name", "Course", "Date", "Status")):
             self.tree.heading(c, text=lbl)
@@ -492,6 +574,7 @@ class AttendanceTab(tk.Frame):
                 self.tree.insert("", "end", values=tuple(row.get(c, "") for c in self.COLS))
 
     def summary(self):
+        self.current_view = "summary"
         self.tree["columns"] = self.SUM_COLS
         for c, lbl in zip(self.SUM_COLS, ("Student ID", "Student Name", "Present", "Absent")):
             self.tree.heading(c, text=lbl)
